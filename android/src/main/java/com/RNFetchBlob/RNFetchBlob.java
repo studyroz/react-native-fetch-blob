@@ -136,16 +136,6 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createFileASCII(final String path, final ReadableArray dataArray, final Callback callback) {
-        threadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                RNFetchBlobFS.createFileASCII(path, dataArray, callback);
-            }
-        });
-    }
-
-    @ReactMethod
     public void writeArrayChunk(final String streamId, final ReadableArray dataArray, final Callback callback) {
         RNFetchBlobFS.writeArrayChunk(streamId, dataArray, callback);
     }
