@@ -100,7 +100,6 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
                 RNFetchBlobFS.createFileASCII(path, dataArray, promise);
             }
         });
-
     }
 
     @ReactMethod
@@ -137,6 +136,16 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void createFileASCII(final String path, final ReadableArray dataArray, final Callback callback) {
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                RNFetchBlobFS.createFileASCII(path, dataArray, callback);
+            }
+        });
+    }
+
+    @ReactMethod
     public void writeArrayChunk(final String streamId, final ReadableArray dataArray, final Callback callback) {
         RNFetchBlobFS.writeArrayChunk(streamId, dataArray, callback);
     }
@@ -164,7 +173,6 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
                 RNFetchBlobFS.cp(path, dest, callback);
             }
         });
-
     }
 
     @ReactMethod
@@ -225,7 +233,6 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
                 RNFetchBlobFS.writeFile(path, encoding, data, append, promise);
             }
         });
-
     }
 
     @ReactMethod
@@ -260,7 +267,6 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
                 new RNFetchBlobFS(ctx).scanFile(p, m, callback);
             }
         });
-
     }
 
     @ReactMethod
@@ -331,7 +337,7 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
     @ReactMethod
     public void fetchBlob(ReadableMap options, String taskId, String method, String url, ReadableMap headers, String body, final Callback callback) {
         new RNFetchBlobReq(options, taskId, method, url, headers, body, null, mClient, callback).run();
-}
+    }
 
     @ReactMethod
     public void fetchBlobForm(ReadableMap options, String taskId, String method, String url, ReadableMap headers, ReadableArray body, final Callback callback) {
@@ -377,4 +383,13 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
 
     }
 
+    @ReactMethod
+    public void getSDCardDir(Promise promise) {
+        RNFetchBlobFS.getSDCardDir(promise);
+    }
+
+    @ReactMethod
+    public void getSDCardApplicationDir(Promise promise) {
+        RNFetchBlobFS.getSDCardApplicationDir(this.getReactApplicationContext(), promise);
+    }
 }

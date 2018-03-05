@@ -20,10 +20,19 @@ const dirs = {
   MovieDir: RNFetchBlob.MovieDir,
   DownloadDir: RNFetchBlob.DownloadDir,
   DCIMDir: RNFetchBlob.DCIMDir,
-  SDCardDir: RNFetchBlob.SDCardDir,
-  SDCardApplicationDir: RNFetchBlob.SDCardApplicationDir,
   MainBundleDir: RNFetchBlob.MainBundleDir,
-  LibraryDir: RNFetchBlob.LibraryDir
+  LibraryDir: RNFetchBlob.LibraryDir,
+  get SDCardDir() {
+    console.warn('SDCardDir as a constant is deprecated and will be removed in feature release. ' +
+      'Use RNFetchBlob.android.getSDCardDir():Promise instead.');
+      return RNFetchBlob.SDCardDir;
+    },
+  get SDCardApplicationDir() {
+    console.warn('SDCardApplicationDir as a constant is deprecated and will be removed in feature release. ' +
+      'Use RNFetchBlob.android.getSDCardApplicationDir():Promise instead. ' +
+      'This variable can be empty on error in native code.');
+    return RNFetchBlob.SDCardApplicationDir;
+  }
 }
 
 function addCode(code: string, error: Error): Error {
