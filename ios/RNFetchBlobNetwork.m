@@ -193,7 +193,7 @@ NSOperationQueue *taskQueue;
     NSString * path = [self.options valueForKey:CONFIG_FILE_PATH];
     NSString * ext = [self.options valueForKey:CONFIG_FILE_EXT];
 	NSString * key = [self.options valueForKey:CONFIG_KEY];
-    __block NSURLSession * session;
+    NSURLSession * session;
 
     bodyLength = contentLength;
 
@@ -244,7 +244,7 @@ NSOperationQueue *taskQueue;
         respFile = NO;
     }
 
-    __block NSURLSessionDataTask * task = [session dataTaskWithRequest:req];
+    NSURLSessionDataTask * task = [session dataTaskWithRequest:req];
     
     [taskTable setObject:@{ @"session" : task, @"isCancelled" : @NO } forKey:taskId];
     [task resume];
@@ -255,8 +255,6 @@ NSOperationQueue *taskQueue;
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         });
     }
-    __block UIApplication * app = [UIApplication sharedApplication];
-
 }
 
 // #115 Invoke fetch.expire event on those expired requests so that the expired event can be handled
