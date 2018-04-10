@@ -42,21 +42,23 @@ NSMutableDictionary * uploadProgressTable;
 
 __attribute__((constructor))
 static void initialize_tables() {
-    if(expirationTable == nil)
-    {
-        expirationTable = [[NSMapTable alloc] init];
-    }
-    if(taskTable == nil)
-    {
-        taskTable = [[NSMapTable alloc] init];
-    }
-    if(progressTable == nil)
-    {
-        progressTable = [[NSMutableDictionary alloc] init];
-    }
-    if(uploadProgressTable == nil)
-    {
-        uploadProgressTable = [[NSMutableDictionary alloc] init];
+    @synchronized([RNFetchBlobNetwork class]) {
+        if(expirationTable == nil)
+        {
+            expirationTable = [[NSMapTable alloc] init];
+        }
+        if(taskTable == nil)
+        {
+            taskTable = [[NSMapTable alloc] init];
+        }
+        if(progressTable == nil)
+        {
+            progressTable = [[NSMutableDictionary alloc] init];
+        }
+        if(uploadProgressTable == nil)
+        {
+            uploadProgressTable = [[NSMutableDictionary alloc] init];
+        }
     }
 }
 
@@ -106,7 +108,7 @@ NSOperationQueue *taskQueue;
 - (id)init {
     self = [super init];
     if(taskQueue == nil) {
-        @synchronized ([RNFetchBlobNetwork class]) {
+        @synchronized([RNFetchBlobNetwork class]) {
             if (taskQueue == nil) {
                 taskQueue = [[NSOperationQueue alloc] init];
                 taskQueue.maxConcurrentOperationCount = 10;
@@ -246,7 +248,10 @@ NSOperationQueue *taskQueue;
 
     NSURLSessionDataTask * task = [session dataTaskWithRequest:req];
     
-    [taskTable setObject:@{ @"session" : task, @"isCancelled" : @NO } forKey:taskId];
+    @synchronized([RNFetchBlobNetwork class])
+    {
+        [taskTable setObject:@{ @"session" : task, @"isCancelled" : @NO } forKey:taskId];
+    }
     [task resume];
 
     // network status indicator
@@ -260,21 +265,23 @@ NSOperationQueue *taskQueue;
 // #115 Invoke fetch.expire event on those expired requests so that the expired event can be handled
 + (void) emitExpiredTasks
 {
-    NSEnumerator * emu =  [expirationTable keyEnumerator];
-    NSString * key;
-
-    while((key = [emu nextObject]))
+    @synchronized([RNFetchBlobNetwork class])
     {
-        RCTBridge * bridge = [RNFetchBlob getRCTBridge];
-        NSData * args = @{ @"taskId": key };
-        [bridge.eventDispatcher sendDeviceEventWithName:EVENT_EXPIRE body:args];
-
+        NSEnumerator * emu =  [expirationTable keyEnumerator];
+        NSString * key;
+        
+        while((key = [emu nextObject]))
+        {
+            RCTBridge * bridge = [RNFetchBlob getRCTBridge];
+            NSData * args = @{ @"taskId": key };
+            [bridge.eventDispatcher sendDeviceEventWithName:EVENT_EXPIRE body:args];
+            
+        }
+        
+        // clear expired task entries
+        [expirationTable removeAllObjects];
+        expirationTable = [[NSMapTable alloc] init];
     }
-
-    // clear expired task entries
-    [expirationTable removeAllObjects];
-    expirationTable = [[NSMapTable alloc] init];
-
 }
 
 ////////////////////////////////////////
@@ -454,7 +461,10 @@ NSOperationQueue *taskQueue;
     {
         [writeStream write:[data bytes] maxLength:[data length]];
     }
-    RNFetchBlobProgress * pconfig = [progressTable valueForKey:taskId];
+    RNFetchBlobProgress * pconfig = nil;
+    @synchronized([RNFetchBlobNetwork class]) {
+        pconfig = [progressTable valueForKey:taskId];
+    }
     if(expectedBytes == 0)
         return;
     NSNumber * now =[NSNumber numberWithFloat:((float)receivedBytes/(float)expectedBytes)];
@@ -502,7 +512,11 @@ NSOperationQueue *taskQueue;
     {
         errMsg = [error localizedDescription];
     }
-    NSDictionary * taskSession = [taskTable objectForKey:taskId];
+    NSDictionary * taskSession = nil;
+    @synchronized([RNFetchBlobNetwork class])
+    {
+        taskSession = [taskTable objectForKey:taskId];
+    }
     BOOL isCancelled = [[taskSession valueForKey:@"isCancelled"] boolValue];
     if(isCancelled) {
         errMsg = @"task cancelled";
@@ -550,7 +564,7 @@ NSOperationQueue *taskQueue;
 
     callback(@[ errMsg, rnfbRespType, respStr]);
 
-    @synchronized(taskTable, uploadProgressTable, progressTable)
+    @synchronized([RNFetchBlobNetwork class])
     {
         if([taskTable objectForKey:taskId] == nil)
             NSLog(@"object released by ARC.");
@@ -569,7 +583,11 @@ NSOperationQueue *taskQueue;
 // upload progress handler
 - (void) URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didSendBodyData:(int64_t)bytesSent totalBytesSent:(int64_t)totalBytesWritten totalBytesExpectedToSend:(int64_t)totalBytesExpectedToWrite
 {
-    RNFetchBlobProgress * pconfig = [uploadProgressTable valueForKey:taskId];
+    RNFetchBlobProgress * pconfig = nil;
+    @synchronized([RNFetchBlobNetwork class])
+    {
+        pconfig = [uploadProgressTable valueForKey:taskId];
+    }
     if(totalBytesExpectedToWrite == 0)
         return;
     NSNumber * now = [NSNumber numberWithFloat:((float)totalBytesWritten/(float)totalBytesExpectedToWrite)];
@@ -587,7 +605,11 @@ NSOperationQueue *taskQueue;
 
 + (void) cancelRequest:(NSString *)taskId
 {
-    NSDictionary * task = [taskTable objectForKey:taskId];
+    NSDictionary *task = nil;
+    @synchronized([RNFetchBlobNetwork class])
+    {
+        task = [taskTable objectForKey:taskId];
+    }
     
     if(task != nil) {
         NSURLSessionDataTask * session = [task objectForKey:@"session"];
