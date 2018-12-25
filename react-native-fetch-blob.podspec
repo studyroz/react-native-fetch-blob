@@ -10,4 +10,5 @@ Pod::Spec.new do |s|
   s.source_files = 'ios/**/*.{h,m}'
   s.platform     = :ios, "7.0"
   s.dependency 'React/Core'
+  s.dependency 'TrustKit', '~> 1.5.0'
 end

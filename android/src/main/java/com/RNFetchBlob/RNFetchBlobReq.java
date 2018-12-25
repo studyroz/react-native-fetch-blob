@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 import 	javax.net.ssl.SSLSocketFactory;
 
 import okhttp3.Call;
+import okhttp3.CertificatePinner;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Headers;
@@ -86,6 +87,7 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
         BASE64
     }
 
+    public static CertificatePinner certificatePinner;
     public static HashMap<String, Call> taskTable = new HashMap<>();
     public static HashMap<String, Long> androidDownloadManagerTaskTable = new HashMap<>();
     static HashMap<String, RNFetchBlobProgressConfig> progressReport = new HashMap<>();
@@ -222,8 +224,8 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
 
         try {
             // use trusty SSL socket
-            if (this.options.trusty) {
-                clientBuilder = RNFetchBlobUtils.getUnsafeOkHttpClient(client);
+            if (this.options.trusty && certificatePinner != null) {
+                clientBuilder = client.newBuilder().certificatePinner(certificatePinner);
             } else {
                 clientBuilder = client.newBuilder();
             }
