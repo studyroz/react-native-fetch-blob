@@ -29,6 +29,8 @@
 #import "RCTBridge.h"
 #endif
 
+#import <TrustKit/TrustKit.h>
+
 ////////////////////////////////////////
 //
 //  HTTP request handler
@@ -631,7 +633,10 @@ NSOperationQueue *taskQueue;
     }
     else
     {
-        completionHandler(NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust]);
+        TSKPinningValidator *pinningValidator = [[TrustKit sharedInstance] pinningValidator];
+        if (![pinningValidator handleChallenge:challenge completionHandler:completionHandler]) {
+            completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust]);
+        }
     }
 }
 
