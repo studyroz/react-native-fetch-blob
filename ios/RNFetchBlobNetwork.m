@@ -190,7 +190,7 @@ NSOperationQueue *taskQueue;
     if (challengeHandler && challengeHandler.shouldIgnoreChallenge && challengeHandler.shouldIgnoreChallenge(req)) {
         ignoreChallenge = true;
     } else {
-        ignoreChallenge = false
+        ignoreChallenge = false;
     }
     backgroundTask = [options valueForKey:@"IOSBackgroundTask"] == nil ? NO : [[options valueForKey:@"IOSBackgroundTask"] boolValue];
     followRedirect = [options valueForKey:@"followRedirect"] == nil ? YES : [[options valueForKey:@"followRedirect"] boolValue];
