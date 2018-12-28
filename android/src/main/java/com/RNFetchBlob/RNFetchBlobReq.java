@@ -68,6 +68,10 @@ import okhttp3.TlsVersion;
 
 public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
 
+    public interface CertificatePinningHandler {
+        boolean shouldSkipCertificatePinning(String url);
+    }
+
     enum RequestType  {
         Form,
         SingleFile,
@@ -88,6 +92,7 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
     }
 
     public static CertificatePinner certificatePinner;
+    public static CertificatePinningHandler certificatePinningHandler;
     public static HashMap<String, Call> taskTable = new HashMap<>();
     public static HashMap<String, Long> androidDownloadManagerTaskTable = new HashMap<>();
     static HashMap<String, RNFetchBlobProgressConfig> progressReport = new HashMap<>();
@@ -224,7 +229,7 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
 
         try {
             // use trusty SSL socket
-            if (this.options.trusty && certificatePinner != null) {
+            if (certificatePinningHandler != null && certificatePinner != null && !certificatePinningHandler.shouldSkipCertificatePinning(url)) {
                 clientBuilder = client.newBuilder().certificatePinner(certificatePinner);
             } else {
                 clientBuilder = client.newBuilder();

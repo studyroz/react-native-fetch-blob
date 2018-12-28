@@ -24,6 +24,13 @@
 typedef void(^CompletionHander)(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error);
 typedef void(^DataTaskCompletionHander) (NSData * _Nullable resp, NSURLResponse * _Nullable response, NSError * _Nullable error);
 
+@interface RNChallengeHandler : NSObject
+
+typedef BOOL(^IgnoreChallengeBlock)(NSURLRequest *);
+@property (copy, nonatomic) IgnoreChallengeBlock shouldIgnoreChallenge;
+
+@end
+
 @interface RNFetchBlobNetwork : NSObject  <NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate>
 
 @property (nullable, nonatomic) NSString * taskId;
@@ -51,7 +58,7 @@ typedef void(^DataTaskCompletionHander) (NSData * _Nullable resp, NSURLResponse 
 - (void) sendRequest:(NSDictionary  * _Nullable )options contentLength:(long)contentLength bridge:(RCTBridge * _Nullable)bridgeRef taskId:(NSString * _Nullable)taskId withRequest:(NSURLRequest * _Nullable)req callback:(_Nullable RCTResponseSenderBlock) callback;
 + (void) enableProgressReport:(NSString *) taskId config:(RNFetchBlobProgress *)config;
 + (void) enableUploadProgress:(NSString *) taskId config:(RNFetchBlobProgress *)config;
-
++ (void) setChallengeHandler:(RNChallengeHandler * _Nullable)handler;
 
 
 @end

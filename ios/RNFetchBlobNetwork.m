@@ -31,6 +31,10 @@
 
 #import <TrustKit/TrustKit.h>
 
+@implementation RNChallengeHandler
+
+@end
+
 ////////////////////////////////////////
 //
 //  HTTP request handler
@@ -41,6 +45,7 @@ NSMapTable * taskTable;
 NSMapTable * expirationTable;
 NSMutableDictionary * progressTable;
 NSMutableDictionary * uploadProgressTable;
+RNChallengeHandler *challengeHandler;
 
 __attribute__((constructor))
 static void initialize_tables() {
@@ -87,6 +92,7 @@ typedef NS_ENUM(NSUInteger, ResponseFormat) {
     ResponseFormat responseFormat;
     BOOL * followRedirect;
     BOOL backgroundTask;
+    BOOL ignoreChallenge;
 }
 
 @end
@@ -138,6 +144,10 @@ NSOperationQueue *taskQueue;
     [uploadProgressTable setValue:config forKey:taskId];
 }
 
++ (void)setChallengeHandler:(RNChallengeHandler *)handler {
+    challengeHandler = handler;
+}
+
 // removing case from headers
 + (NSMutableDictionary *) normalizeHeaders:(NSDictionary *)headers
 {
@@ -177,7 +187,11 @@ NSOperationQueue *taskQueue;
     self.expectedBytes = 0;
     self.receivedBytes = 0;
     self.options = options;
-    
+    if (challengeHandler && challengeHandler.shouldIgnoreChallenge && challengeHandler.shouldIgnoreChallenge(req)) {
+        ignoreChallenge = true;
+    } else {
+        ignoreChallenge = false
+    }
     backgroundTask = [options valueForKey:@"IOSBackgroundTask"] == nil ? NO : [[options valueForKey:@"IOSBackgroundTask"] boolValue];
     followRedirect = [options valueForKey:@"followRedirect"] == nil ? YES : [[options valueForKey:@"followRedirect"] boolValue];
     isIncrement = [options valueForKey:@"increment"] == nil ? NO : [[options valueForKey:@"increment"] boolValue];
@@ -626,13 +640,9 @@ NSOperationQueue *taskQueue;
 
 - (void) URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable credantial))completionHandler
 {
-    BOOL trusty = [options valueForKey:CONFIG_TRUSTY];
-    if(!trusty)
-    {
+    if (ignoreChallenge) {
         completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust]);
-    }
-    else
-    {
+    } else {
         TSKPinningValidator *pinningValidator = [[TrustKit sharedInstance] pinningValidator];
         if (![pinningValidator handleChallenge:challenge completionHandler:completionHandler]) {
             completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust]);
