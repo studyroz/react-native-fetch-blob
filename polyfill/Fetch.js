@@ -1,4 +1,4 @@
-import RNFetchBlob from '../index.js'
+import RNFetchBlob from '../FetchBlob'
 import Log from '../utils/log.js'
 import fs from '../fs'
 import unicode from '../utils/unicode'
@@ -40,12 +40,12 @@ class RNFetchBlobFetchPolyfill {
           promise = Blob.build(body).then((b) => {
             blobCache = b
             options.headers['Content-Type'] = 'multipart/form-data;boundary=' + b.multipartBoundary
-            return Promise.resolve(RNFetchBlob.wrap(b._ref))
+            return Promise.resolve(Blob.wrap(b._ref))
           })
         }
         // When request body is a Blob, use file URI of the Blob as request body.
         else if (body.isRNFetchBlobPolyfill)
-          promise = Promise.resolve(RNFetchBlob.wrap(body.blobPath))
+          promise = Promise.resolve(Blob.wrap(body.blobPath))
         else if (typeof body !== 'object' && options.headers['Content-Type'] !== 'application/json')
           promise = Promise.resolve(JSON.stringify(body))
         else if (typeof body !== 'string')
