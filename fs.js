@@ -425,6 +425,7 @@ export default {
   cp,
   writeStream,
   writeFile,
+  writeFileToLocalAlbum,
   appendFile,
   pathForAppGroup,
   readFile,
