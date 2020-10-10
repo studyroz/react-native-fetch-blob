@@ -226,6 +226,16 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void writeFileToLocalAlbum(final String path, final String data, final String type, final String encoding, final Promise promise) {
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                RNFetchBlobFS.writeFileToLocalAlbum(RCTContext, path, data, type, encoding, promise);
+            }
+        });
+    }
+
+    @ReactMethod
     public void lstat(String path, Callback callback) {
         RNFetchBlobFS.lstat(path, callback);
     }
