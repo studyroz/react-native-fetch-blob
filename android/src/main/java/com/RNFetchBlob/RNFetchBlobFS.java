@@ -121,16 +121,19 @@ class RNFetchBlobFS {
         } else {
             ContentResolver resolver = mCtx.getContentResolver();
             ContentValues values = new ContentValues();
+            Uri uri;
             if ("image".equals(type)) {
                 values.put(MediaStore.Images.Media.DISPLAY_NAME, path.substring(path.lastIndexOf("/")) + 1);
                 values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/Picture");
+                uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
             } else {
                 values.put(MediaStore.Video.Media.DISPLAY_NAME, path.substring(path.lastIndexOf("/")) + 1);
                 values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+                values.put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/Picture");
+                uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
             }
-            values.put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/Picture");
 
-            Uri uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
             if (uri == null) {
                 promise.reject("ENOENT", "fail to insert uri to MediaStore");
                 return;
