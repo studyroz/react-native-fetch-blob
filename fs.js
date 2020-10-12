@@ -184,6 +184,22 @@ function writeFile(path: string, data: string | Array<number>, encoding: ?string
   }
 }
 
+/**
+ * Write data to local album
+ * @param {*} path  Path of the file.
+ * @param {*} data  Data to write to the file.
+ * @param {*} type  Type of the file. image / video
+ */
+function writeFileToLocalAlbum(path: string, data: string | Array<number>, type: string, encoding: ?string = 'utf8'): Promise {
+  if (typeof path !== 'string') {
+    return Promise.reject(addCode('EINVAL', new TypeError('Missing argument "path" ')))
+  }
+  if (typeof data !== 'string') {
+    return Promise.reject(addCode('EINVAL', new TypeError(`"data" must be a String when encoding is "utf8" or "base64", but it is "${typeof data}"`)))
+  }
+  return RNFetchBlob.writeFileToLocalAlbum(path, data, type, encoding)
+}
+
 function appendFile(path: string, data: string | Array<number>, encoding?: string = 'utf8'): Promise<number> {
   if (typeof path !== 'string') {
     return Promise.reject(addCode('EINVAL', new TypeError('Missing argument "path" ')))
@@ -409,6 +425,7 @@ export default {
   cp,
   writeStream,
   writeFile,
+  writeFileToLocalAlbum,
   appendFile,
   pathForAppGroup,
   readFile,

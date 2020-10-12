@@ -1,5 +1,7 @@
 package com.RNFetchBlob;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -8,6 +10,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.util.Base64;
 
 import com.RNFetchBlob.Utils.PathResolver;
@@ -101,6 +104,66 @@ class RNFetchBlobFS {
             promise.reject("ENOENT", "File '" + path + "' does not exist and could not be created, or it is a directory");
         } catch (Exception e) {
             promise.reject("EUNSPECIFIED", e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Write data to local album
+     * @param path Destination file path.
+     * @param data data passed from JS context.
+     * @param type file type image / video
+     * @param promise RCT Promise
+     */
+    static void writeFileToLocalAlbum(ReactApplicationContext mCtx, String path, String data, String type, String encoding, final Promise promise) {
+        int written = 0;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            writeFile(path, encoding, data, false, promise);
+        } else {
+            ContentResolver resolver = mCtx.getContentResolver();
+            ContentValues values = new ContentValues();
+            Uri uri;
+            if ("image".equals(type)) {
+                values.put(MediaStore.Images.Media.DISPLAY_NAME, path.substring(path.lastIndexOf("/")) + 1);
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/Picture");
+                uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            } else {
+                values.put(MediaStore.Video.Media.DISPLAY_NAME, path.substring(path.lastIndexOf("/")) + 1);
+                values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+                values.put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/Picture");
+                uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+            }
+
+            if (uri == null) {
+                promise.reject("ENOENT", "fail to insert uri to MediaStore");
+                return;
+            }
+
+            OutputStream os = null;
+            try {
+                byte[] bytes = stringToBytes(data, encoding);
+                try {
+                    os = resolver.openOutputStream(uri);
+                    if (os != null) {
+                        os.write(bytes);
+                        written = bytes.length;
+                    }
+                } catch (IOException e) {
+                    promise.reject(e);
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
+                promise.reject(e);
+            } finally {
+                if (os != null) {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        promise.reject(e);
+                    }
+                }
+                promise.resolve(written);
+            }
         }
     }
 
