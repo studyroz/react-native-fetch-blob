@@ -479,7 +479,7 @@ NSOperationQueue *taskQueue;
 {
 
     self.error = error;
-    NSString * errMsg = [NSNull null];
+    NSString * errMsg = nil;
     NSString * respStr = [NSNull null];
     NSString * rnfbRespType = @"";
 
@@ -492,7 +492,7 @@ NSOperationQueue *taskQueue;
 
     if(error != nil)
     {
-        errMsg = [error localizedDescription];
+        errMsg = [NSString stringWithFormat:@"%@(%@ %d)",error.localizedDescription, error.domain, error.code];
     }
 
     if(respFile == YES)
@@ -535,7 +535,7 @@ NSOperationQueue *taskQueue;
     }
 
 
-    callback(@[ errMsg, rnfbRespType, respStr]);
+    callback(@[ errMsg ?: [NSNull null], rnfbRespType, respStr]);
 
     @synchronized(taskTable, uploadProgressTable, progressTable)
     {
