@@ -533,10 +533,6 @@ NSOperationQueue *taskQueue;
     {
         taskSession = [taskTable objectForKey:taskId];
     }
-    BOOL isCancelled = [[taskSession valueForKey:@"isCancelled"] boolValue];
-    if(isCancelled) {
-        errMsg = @"task cancelled";
-    }
 
     if(respFile == YES)
     {
