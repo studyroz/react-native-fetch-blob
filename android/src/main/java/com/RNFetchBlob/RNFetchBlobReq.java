@@ -451,7 +451,7 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
         } catch (Exception error) {
             error.printStackTrace();
             releaseTaskResource();
-            callback.invoke("RNFetchBlob request error: " + error.getMessage() + error.getClass());
+            callback.invoke("RNFetchBlob request error: " + error.getMessage() + error.getCause());
         }
     }
 
