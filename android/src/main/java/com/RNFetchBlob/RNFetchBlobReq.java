@@ -418,7 +418,7 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
                         callback.invoke("request timed out.", null, null);
                     }
                     else
-                        callback.invoke(e.getLocalizedMessage(), null, null);
+                        callback.invoke(e.getClass().toString() + ": " + e.getLocalizedMessage(), null, null);
                     releaseTaskResource();
                 }
 
