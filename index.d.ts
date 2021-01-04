@@ -605,6 +605,7 @@ export interface RNFetchBlobResponseInfo {
     status: number;
     respType: "text" | "blob" | "" | "json";
     rnfbEncode: "path" | "base64" | "ascii" | "utf8";
+    redirects?: string[];
 }
 
 export interface RNFetchBlobStream {
