@@ -23,14 +23,14 @@ const dirs = {
   MainBundleDir: RNFetchBlob.MainBundleDir,
   LibraryDir: RNFetchBlob.LibraryDir,
   get SDCardDir() {
-    console.warn('SDCardDir as a constant is deprecated and will be removed in feature release. ' +
-      'Use RNFetchBlob.android.getSDCardDir():Promise instead.');
+    // console.warn('SDCardDir as a constant is deprecated and will be removed in feature release. ' +
+      // 'Use RNFetchBlob.android.getSDCardDir():Promise instead.');
       return RNFetchBlob.SDCardDir;
     },
   get SDCardApplicationDir() {
-    console.warn('SDCardApplicationDir as a constant is deprecated and will be removed in feature release. ' +
-      'Use RNFetchBlob.android.getSDCardApplicationDir():Promise instead. ' +
-      'This variable can be empty on error in native code.');
+    // console.warn('SDCardApplicationDir as a constant is deprecated and will be removed in feature release. ' +
+      // 'Use RNFetchBlob.android.getSDCardApplicationDir():Promise instead. ' +
+      // 'This variable can be empty on error in native code.');
     return RNFetchBlob.SDCardApplicationDir;
   }
 }
