@@ -389,7 +389,8 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
 
 
             if(options.timeout >= 0) {
-                clientBuilder.callTimeout(options.timeout, TimeUnit.MILLISECONDS);
+                clientBuilder.connectTimeout(options.timeout, TimeUnit.MILLISECONDS);
+                clientBuilder.readTimeout(options.timeout, TimeUnit.MILLISECONDS);
             }
 
             clientBuilder.connectionPool(pool);
